@@ -28,6 +28,8 @@ def train(model: MatrixFactorizer,
         preds = model(mol_indices, task_indices)
 
         targets = torch.FloatTensor(targets)
+        if preds.is_cuda:
+            targets = targets.cuda()
 
         loss = loss_func(preds, targets)
 
