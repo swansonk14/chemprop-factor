@@ -27,7 +27,6 @@ def main(args: Namespace):
     # Construct model
     model = MatrixFactorizer(num_mols, num_tasks)
 
-    # TODO
     # Run training
     for epoch in trange(args.epochs):
         print(f'Epoch {epoch}')
