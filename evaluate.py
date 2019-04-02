@@ -1,8 +1,7 @@
-from typing import List, Tuple
-
+from data import MoleculeFactorDataset
 from model import MatrixFactorizer
 
 
 def evaluate(model: MatrixFactorizer,
-             data: List[Tuple[int, int]]) -> float:
+             data: MoleculeFactorDataset) -> float:
     pass

@@ -4,6 +4,7 @@ from chemprop.data.utils import get_data
 import numpy as np
 from tqdm import trange
 
+from data import convert_moleculedataset_to_moleculefactordataset
 from evaluate import evaluate
 from model import MatrixFactorizer
 from train import train
@@ -12,17 +13,12 @@ from utils import split_data
 
 def main(args: Namespace):
     # Load data
-    data = get_data(args.data_path)
-    targets = data.targets()
-
-    # Get number of molecules and tasks
-    num_mols, num_tasks = len(data), data.num_tasks()
-
-    # Determine known molecule-task pairs
-    known_pairs = [(mol_index, task_index) for mol_index in range(num_mols) for task_index in range(num_tasks) if targets[mol_index][task_index] is not None]
+    dataset = get_data(args.data_path)
+    num_mols, num_tasks = len(dataset), dataset.num_tasks()
+    data = convert_moleculedataset_to_moleculefactordataset(dataset)
 
     # Split data
-    train_data, val_data, test_data = split_data(known_pairs)
+    train_data, val_data, test_data = split_data(data)
 
     # Construct model
     model = MatrixFactorizer(num_mols, num_tasks)

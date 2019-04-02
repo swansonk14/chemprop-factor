@@ -1,17 +1,15 @@
-import random
-from typing import List, Tuple
-
 from tqdm import trange
 
+from data import MoleculeFactorDataset
 from model import MatrixFactorizer
 
 
 def train(model: MatrixFactorizer,
-          data: List[Tuple[int, int]],
+          data: MoleculeFactorDataset,
           batch_size: int = 50):
     model.train()
 
-    random.shuffle(data)
+    data.shuffle()
 
     num_iters = len(data) // batch_size * batch_size
 

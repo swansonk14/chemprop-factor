@@ -1,18 +1,20 @@
 import random
-from typing import List, Tuple
+from typing import Tuple
+
+from data import MoleculeFactorDataset
 
 
-def split_data(data: List[Tuple[int, int]],
+def split_data(data: MoleculeFactorDataset,
                sizes: Tuple[int, int, int] = (0.8, 0.1, 0.1),
-               seed: int = 0) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]], List[Tuple[int, int]]]:
+               seed: int = 0) -> Tuple[MoleculeFactorDataset, MoleculeFactorDataset, MoleculeFactorDataset]:
     random.seed(seed)
     random.shuffle(data)
 
     train_size = int(sizes[0] * len(data))
     train_val_size = int((sizes[0] + sizes[1]) * len(data))
 
-    train = data[:train_size]
-    val = data[train_size:train_val_size]
-    test = data[train_val_size:]
+    train_data = data[:train_size]
+    val_data = data[train_size:train_val_size]
+    test_data = data[train_val_size:]
 
-    return train, val, test
+    return MoleculeFactorDataset(train_data), MoleculeFactorDataset(val_data), MoleculeFactorDataset(test_data)
