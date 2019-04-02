@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, Namespace
 
 from chemprop.data.utils import get_data
+import torch
 import torch.nn as nn
 from torch.optim import Adam
 from tqdm import trange
@@ -13,20 +14,24 @@ from utils import split_data
 
 
 def main(args: Namespace):
-    # Load data
+    print('Loading data')
     dataset = get_data(args.data_path)
     num_mols, num_tasks = len(dataset), dataset.num_tasks()
     data = convert_moleculedataset_to_moleculefactordataset(dataset)
 
-    # Split data
+    print('Splitting data')
     train_data, val_data, test_data = split_data(data)
 
-    # Construct model
+    print('Building model')
     model = MatrixFactorizer(num_mols, num_tasks)
-    loss_func = nn.BCELoss(reduction='none')
+    loss_func = nn.BCELoss()
     optimizer = Adam(model.parameters(), lr=args.lr)
 
-    # Run training
+    if args.cuda:
+        print('Moving model to cuda')
+        model = model.cuda()
+
+    print('Training')
     for epoch in trange(args.epochs):
         print(f'Epoch {epoch}')
         train(
@@ -39,14 +44,13 @@ def main(args: Namespace):
             model=model,
             data=val_data
         )
-        print(f'Validation score = {val_score:.6f}')
+        print(f'Validation auc = {val_score:.6f}')
 
-    # Test
     test_score = evaluate(
         model=model,
         data=test_data
     )
-    print(f'Test score = {test_score:.6f}')
+    print(f'Test auc = {test_score:.6f}')
 
 
 if __name__ == '__main__':
@@ -58,5 +62,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.0001,
                         help='Learning rate')
     args = parser.parse_args()
+
+    args.cuda = torch.cuda.is_available()
 
     main(args)

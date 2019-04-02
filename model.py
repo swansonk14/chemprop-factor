@@ -22,7 +22,7 @@ class MatrixFactorizer(nn.Module):
         self.mol_embedding = nn.Embedding(self.num_mols, self.embedding_dim)
         self.task_embedding = nn.Embedding(self.num_tasks, self.embedding_dim)
         self.W1 = nn.Linear(2 * self.embedding_dim, self.hidden_dim)
-        self.W2 = nn.Linear(self.hidden_dim, self.num_tasks)
+        self.W2 = nn.Linear(self.hidden_dim, 1)
         self.dropout = nn.Dropout(self.p)
         self.relu = nn.ReLU()
         # TODO: separate cases for regression and classification
@@ -30,6 +30,11 @@ class MatrixFactorizer(nn.Module):
 
     def forward(self, mol_indices: List[int], task_indices: List[int]) -> torch.FloatTensor:
         assert len(mol_indices) == len(task_indices)
+
+        mol_indices, task_indices = torch.LongTensor(mol_indices), torch.LongTensor(task_indices)
+
+        if next(self.parameters()).is_cuda:
+            mol_indices, task_indices = mol_indices.cuda(), task_indices.cuda()
 
         # Look up molecule and task embeddings
         mol_embeddings, task_embeddings = self.mol_embedding(mol_indices), self.task_embedding(task_indices)
@@ -42,5 +47,7 @@ class MatrixFactorizer(nn.Module):
         hiddens = self.relu(self.W1(joint_embeddings))
         hiddens = self.dropout(hiddens)
         output = self.sigmoid(self.W2(hiddens))
+
+        output = output.squeeze(dim=-1)
 
         return output

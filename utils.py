@@ -1,4 +1,3 @@
-import random
 from typing import Tuple
 
 from data import MoleculeFactorDataset
@@ -7,8 +6,7 @@ from data import MoleculeFactorDataset
 def split_data(data: MoleculeFactorDataset,
                sizes: Tuple[int, int, int] = (0.8, 0.1, 0.1),
                seed: int = 0) -> Tuple[MoleculeFactorDataset, MoleculeFactorDataset, MoleculeFactorDataset]:
-    random.seed(seed)
-    random.shuffle(data)
+    data.shuffle(seed)
 
     train_size = int(sizes[0] * len(data))
     train_val_size = int((sizes[0] + sizes[1]) * len(data))

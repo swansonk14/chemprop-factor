@@ -7,10 +7,10 @@ from model import MatrixFactorizer
 from predict import predict
 
 
-def evaluate_predictions(preds: List[float],
-                         targets: List[int]):
+def evaluate_predictions(targets: List[int],
+                         preds: List[float]):
     # TODO: support other metrics
-    return roc_auc_score(preds, targets)
+    return roc_auc_score(targets, preds)
 
 
 def evaluate(model: MatrixFactorizer,
@@ -23,8 +23,8 @@ def evaluate(model: MatrixFactorizer,
     targets = data.targets()
 
     score = evaluate_predictions(
-        preds=preds,
-        targets=targets
+        targets=targets,
+        preds=preds
     )
 
     return score
