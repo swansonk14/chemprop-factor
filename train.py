@@ -12,7 +12,7 @@ def train(model: MatrixFactorizer,
           data: MoleculeFactorDataset,
           loss_func: Callable,
           optimizer: Optimizer,
-          batch_size: int = 50):
+          batch_size: int):
     model.train()
 
     data.shuffle()

@@ -8,22 +8,22 @@ class MatrixFactorizer(nn.Module):
     def __init__(self,
                  num_mols: int,
                  num_tasks: int,
-                 embedding_dim: int = 20,
-                 hidden_dim: int = 10,
-                 p: float = 0.05):
+                 embedding_dim: int,
+                 hidden_dim: int,
+                 dropout_prob: float):
         super(MatrixFactorizer, self).__init__()
 
         self.num_mols = num_mols
         self.num_tasks = num_tasks
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
-        self.p = p
+        self.dropout_prob = dropout_prob
 
         self.mol_embedding = nn.Embedding(self.num_mols, self.embedding_dim)
         self.task_embedding = nn.Embedding(self.num_tasks, self.embedding_dim)
         self.W1 = nn.Linear(2 * self.embedding_dim, self.hidden_dim)
         self.W2 = nn.Linear(self.hidden_dim, 1)
-        self.dropout = nn.Dropout(self.p)
+        self.dropout = nn.Dropout(self.dropout_prob)
         self.relu = nn.ReLU()
         # TODO: separate cases for regression and classification
         self.sigmoid = nn.Sigmoid()

@@ -9,7 +9,7 @@ from model import MatrixFactorizer
 
 def predict(model: MatrixFactorizer,
             data: MoleculeFactorDataset,
-            batch_size: int = 50) -> List[float]:
+            batch_size: int) -> List[float]:
     model.eval()
 
     preds = []
