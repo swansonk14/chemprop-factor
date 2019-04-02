@@ -15,6 +15,15 @@ class MoleculeFactorDataset:
     def __init__(self, data: List[MoleculeFactorDatapoint]):
         self.data = data
 
+    def mol_indices(self) -> List[int]:
+        return [d.mol_index for d in self.data]
+
+    def task_indices(self) -> List[int]:
+        return [d.task_index for d in self.data]
+
+    def targets(self) -> List[int]:
+        return [d.target for d in self.data]
+
     def shuffle(self, seed: int = None):
         if seed is not None:
             random.seed(seed)
