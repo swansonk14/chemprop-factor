@@ -1,7 +1,6 @@
-from argparse import ArgumentParser, Namespace
+from argparse import Namespace
 
 from chemprop.data.utils import get_data
-import torch
 import torch.nn as nn
 from torch.optim import Adam
 from tqdm import trange
@@ -9,6 +8,7 @@ from tqdm import trange
 from data import convert_moleculedataset_to_moleculefactordataset
 from evaluate import evaluate
 from model import MatrixFactorizer
+from parsing import parse_train_args
 from train import train
 from utils import split_data
 
@@ -70,28 +70,5 @@ def main(args: Namespace):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    # General arguments
-    parser.add_argument('--data_path', type=str, required=True,
-                        help='Path to data CSV file')
-
-    # Model arguments
-    parser.add_argument('--embedding_dim', type=int, default=100,
-                        help='Molecule/task embedding dimensionality')
-    parser.add_argument('--hidden_dim', type=int, default=50,
-                        help='Neural network dimensionality')
-    parser.add_argument('--dropout_prob', type=float, default=0.05,
-                        help='Dropout probability')
-
-    # Training arguments
-    parser.add_argument('--epochs', type=int, default=30,
-                        help='Number of epochs to train for')
-    parser.add_argument('--batch_size', type=int, default=50,
-                        help='Batch size')
-    parser.add_argument('--lr', type=float, default=0.0001,
-                        help='Learning rate')
-    args = parser.parse_args()
-
-    args.cuda = torch.cuda.is_available()
-
+    args = parse_train_args()
     main(args)
