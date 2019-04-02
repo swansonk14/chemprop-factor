@@ -7,6 +7,12 @@ def add_train_args(parser: ArgumentParser):
     # General arguments
     parser.add_argument('--data_path', type=str, required=True,
                         help='Path to data CSV file')
+    parser.add_argument('--save_path', type=str,
+                        help='Path to save checkpoint at the end')
+    parser.add_argument('--checkpoint_path', type=str,
+                        help='Path to load checkpoint from; skips training')
+    parser.add_argument('--filled_matrix_path', type=str,
+                        help='Path to save the data matrix filled with new predictions')
 
     # Model arguments
     parser.add_argument('--embedding_dim', type=int, default=100,

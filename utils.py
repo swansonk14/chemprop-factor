@@ -1,6 +1,9 @@
 from typing import Tuple
 
 from data import MoleculeFactorDataset
+from model import MatrixFactorizer
+
+import torch
 
 
 def split_data(data: MoleculeFactorDataset,
@@ -16,3 +19,24 @@ def split_data(data: MoleculeFactorDataset,
     test_data = data[train_val_size:]
 
     return MoleculeFactorDataset(train_data), MoleculeFactorDataset(val_data), MoleculeFactorDataset(test_data)
+
+def save(model, args, path):
+    state = {
+        'args': args,
+        'state_dict': model.state_dict(),
+    }
+    torch.save(state, path)
+
+def load(path):
+    state = torch.load(path, map_location=lambda storage, loc: storage)
+    state_dict = state['state_dict']
+    args = state['args']
+    model = MatrixFactorizer(
+        num_mols=args.num_mols,
+        num_tasks=args.num_tasks,
+        embedding_dim=args.embedding_dim,
+        hidden_dim=args.hidden_dim,
+        dropout_prob=args.dropout_prob
+    )
+    model.load_state_dict(state_dict)
+    return model, args
