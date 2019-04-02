@@ -1,7 +1,7 @@
 from argparse import Namespace
 
 from chemprop.data.utils import get_data
-import torch.nn as nn
+from chemprop.utils import get_metric_func, get_loss_func
 from torch.optim import Adam
 from tqdm import trange
 
@@ -35,7 +35,8 @@ def main(args: Namespace):
         print('Loading saved model')
         model, loaded_args = load(args.checkpoint_path)
         assert args.num_mols == loaded_args.num_mols and args.num_tasks == loaded_args.num_tasks
-        args.embedding_dim, args.hidden_dim, args.dropout_prob = loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout_prob
+        args.embedding_dim, args.hidden_dim, args.dropout_prob, args.activation, args.classification = \
+            loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout_prob, loaded_args.activation, loaded_args.classification
     else:
         print('Building new model')
         model = MatrixFactorizer(
@@ -43,9 +44,12 @@ def main(args: Namespace):
             num_tasks=num_tasks,
             embedding_dim=args.embedding_dim,
             hidden_dim=args.hidden_dim,
-            dropout_prob=args.dropout_prob
+            dropout=args.dropout,
+            activation=args.activation,
+            classification=(args.dataset_type == 'classification')
         )
-        loss_func = nn.BCELoss()
+        loss_func = get_loss_func(args)
+        metric_func = get_metric_func(metric=args.metric)
         optimizer = Adam(model.parameters(), lr=args.lr)
 
         if args.cuda:
@@ -65,16 +69,18 @@ def main(args: Namespace):
             val_score = evaluate(
                 model=model,
                 data=val_data,
+                metric_func=metric_func,
                 batch_size=args.batch_size
             )
-            print(f'Validation auc = {val_score:.6f}')
+            print(f'Validation {args.metric} = {val_score:.6f}')
 
     test_score = evaluate(
         model=model,
         data=test_data,
+        metric_func=metric_func,
         batch_size=args.batch_size
     )
-    print(f'Test auc = {test_score:.6f}')
+    print(f'Test {args.metric} = {test_score:.6f}')
 
     if args.save_path is not None:
         print('Saving model')

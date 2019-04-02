@@ -7,6 +7,16 @@ def add_train_args(parser: ArgumentParser):
     # General arguments
     parser.add_argument('--data_path', type=str, required=True,
                         help='Path to data CSV file')
+    parser.add_argument('--dataset_type', type=str, required=True,
+                        choices=['classification', 'regression'],
+                        help='Type of dataset, e.g. classification or regression.'
+                             'This determines the loss function used during training.')
+    parser.add_argument('--metric', type=str, default=None,
+                        choices=['auc', 'prc-auc', 'rmse', 'mae', 'r2', 'accuracy'],
+                        help='Metric to use during evaluation.'
+                             'Note: Does NOT affect loss function used during training'
+                             '(loss is determined by the `dataset_type` argument).'
+                             'Note: Defaults to "auc" for classification and "rmse" for regression.')
     parser.add_argument('--save_path', type=str,
                         help='Path to save checkpoint at the end')
     parser.add_argument('--checkpoint_path', type=str,
@@ -19,7 +29,7 @@ def add_train_args(parser: ArgumentParser):
                         help='Molecule/task embedding dimensionality')
     parser.add_argument('--hidden_dim', type=int, default=100,
                         help='Neural network dimensionality')
-    parser.add_argument('--dropout_prob', type=float, default=0.05,
+    parser.add_argument('--dropout', type=float, default=0.05,
                         help='Dropout probability')
 
     # Training arguments
@@ -29,10 +39,23 @@ def add_train_args(parser: ArgumentParser):
                         help='Batch size')
     parser.add_argument('--lr', type=float, default=0.005,
                         help='Learning rate')
+    parser.add_argument('--activation', type=str, default='ReLU',
+                        choices=['ReLU', 'LeakyReLU', 'PReLU', 'tanh', 'SELU', 'ELU'],
+                        help='Activation function')
 
 
 def modify_train_args(args: Namespace):
     args.cuda = torch.cuda.is_available()
+
+    if args.metric is None:
+        if args.dataset_type == 'classification':
+            args.metric = 'auc'
+        else:
+            args.metric = 'rmse'
+
+    if not ((args.dataset_type == 'classification' and args.metric in ['auc', 'prc-auc', 'accuracy']) or
+            (args.dataset_type == 'regression' and args.metric in ['rmse', 'mae', 'r2'])):
+        raise ValueError(f'Metric "{args.metric}" invalid for dataset type "{args.dataset_type}".')
 
 
 def parse_train_args() -> Namespace:
