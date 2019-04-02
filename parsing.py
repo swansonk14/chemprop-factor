@@ -11,12 +11,18 @@ def add_train_args(parser: ArgumentParser):
                         choices=['classification', 'regression'],
                         help='Type of dataset, e.g. classification or regression.'
                              'This determines the loss function used during training.')
-    parser.add_argument('--metric', type=str, default=None,
+    parser.add_argument('--metric', type=str,
                         choices=['auc', 'prc-auc', 'rmse', 'mae', 'r2', 'accuracy'],
                         help='Metric to use during evaluation.'
                              'Note: Does NOT affect loss function used during training'
                              '(loss is determined by the `dataset_type` argument).'
                              'Note: Defaults to "auc" for classification and "rmse" for regression.')
+    parser.add_argument('--save_path', type=str,
+                        help='Path to save checkpoint at the end')
+    parser.add_argument('--checkpoint_path', type=str,
+                        help='Path to load checkpoint from; skips training')
+    parser.add_argument('--filled_matrix_path', type=str,
+                        help='Path to save the data matrix filled with new predictions')
 
     # Model arguments
     parser.add_argument('--embedding_dim', type=int, default=100,

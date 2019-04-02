@@ -8,16 +8,18 @@ from tqdm import trange
 
 from data import convert_moleculedataset_to_moleculefactordataset
 from evaluate import evaluate
+from predict import fill_matrix
 from model import MatrixFactorizer
 from parsing import parse_train_args
 from train import train
-from utils import split_data
+from utils import split_data, save, load
 
 
 def main(args: Namespace):
     print('Loading data')
     dataset = get_data(args.data_path)
     num_mols, num_tasks = len(dataset), dataset.num_tasks()
+    args.num_mols, args.num_tasks = num_mols, num_tasks
     data = convert_moleculedataset_to_moleculefactordataset(dataset)
 
     print(f'Number of molecules = {num_mols:,}')
@@ -30,16 +32,24 @@ def main(args: Namespace):
     print(f'Total size = {len(data):,} | '
           f'train size = {len(train_data):,} | val size = {len(val_data):,} | test size = {len(test_data):,}')
 
-    print('Building model')
-    model = MatrixFactorizer(
-        num_mols=num_mols,
-        num_tasks=num_tasks,
-        embedding_dim=args.embedding_dim,
-        hidden_dim=args.hidden_dim,
-        dropout=args.dropout,
-        activation=args.activation,
-        classification=(args.dataset_type == 'classification')
-    )
+    if args.checkpoint_path is not None:
+        print('Loading saved model')
+        model, loaded_args = load(args.checkpoint_path)
+        assert args.num_mols == loaded_args.num_mols and args.num_tasks == loaded_args.num_tasks
+        args.embedding_dim, args.hidden_dim, args.dropout_prob, args.activation, args.classification = \
+            loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout_prob, loaded_args.activation, loaded_args.classification
+    else:
+        print('Building model')
+        model = MatrixFactorizer(
+            num_mols=num_mols,
+            num_tasks=num_tasks,
+            embedding_dim=args.embedding_dim,
+            hidden_dim=args.hidden_dim,
+            dropout=args.dropout,
+            activation=args.activation,
+            classification=(args.dataset_type == 'classification')
+        )
+
     print(model)
     print(f'Number of parameters = {param_count(model):,}')
 
@@ -76,6 +86,14 @@ def main(args: Namespace):
         batch_size=args.batch_size
     )
     print(f'Test {args.metric} = {test_score:.6f}')
+
+    if args.save_path is not None:
+        print('Saving model')
+        save(model, args, args.save_path)
+    
+    if args.filled_matrix_path is not None:
+        print('Filling matrix of data')
+        fill_matrix(model, args, data)
 
 
 if __name__ == '__main__':
