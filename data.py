@@ -42,7 +42,6 @@ def convert_moleculedataset_to_moleculefactordataset(dataset: MoleculeDataset) -
     for mol_index, datapoint in enumerate(dataset):
         for task_index, target in enumerate(datapoint.targets):
             if target is not None:
-                # TODO: don't cast to int if doing regression
-                datapoints.append(MoleculeFactorDatapoint(mol_index, task_index, int(target)))
+                datapoints.append(MoleculeFactorDatapoint(mol_index, task_index, target))
 
     return MoleculeFactorDataset(datapoints)

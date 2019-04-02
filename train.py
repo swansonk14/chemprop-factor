@@ -31,7 +31,7 @@ def train(model: MatrixFactorizer,
         if preds.is_cuda:
             targets = targets.cuda()
 
-        loss = loss_func(preds, targets)
+        loss = loss_func(preds, targets).sum()
 
         loss.backward()
         optimizer.step()
