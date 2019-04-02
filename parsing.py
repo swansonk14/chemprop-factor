@@ -11,17 +11,17 @@ def add_train_args(parser: ArgumentParser):
     # Model arguments
     parser.add_argument('--embedding_dim', type=int, default=100,
                         help='Molecule/task embedding dimensionality')
-    parser.add_argument('--hidden_dim', type=int, default=50,
+    parser.add_argument('--hidden_dim', type=int, default=100,
                         help='Neural network dimensionality')
     parser.add_argument('--dropout_prob', type=float, default=0.05,
                         help='Dropout probability')
 
     # Training arguments
-    parser.add_argument('--epochs', type=int, default=30,
+    parser.add_argument('--epochs', type=int, default=5,
                         help='Number of epochs to train for')
     parser.add_argument('--batch_size', type=int, default=50,
                         help='Batch size')
-    parser.add_argument('--lr', type=float, default=0.0001,
+    parser.add_argument('--lr', type=float, default=0.005,
                         help='Learning rate')
 
 
