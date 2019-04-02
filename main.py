@@ -1,6 +1,7 @@
 from argparse import Namespace
 
 from chemprop.data.utils import get_data
+from chemprop.nn_utils import param_count
 from chemprop.utils import get_metric_func, get_loss_func
 from torch.optim import Adam
 from tqdm import trange
@@ -39,6 +40,9 @@ def main(args: Namespace):
         activation=args.activation,
         classification=(args.dataset_type == 'classification')
     )
+    print(model)
+    print(f'Number of parameters = {param_count(model):,}')
+
     loss_func = get_loss_func(args)
     metric_func = get_metric_func(metric=args.metric)
     optimizer = Adam(model.parameters(), lr=args.lr)
