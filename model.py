@@ -8,21 +8,39 @@ class MatrixFactorizer(nn.Module):
     def __init__(self,
                  num_mols: int,
                  num_tasks: int,
-                 embedding_dim: int = 10,
+                 embedding_dim: int = 20,
+                 hidden_dim: int = 10,
                  p: float = 0.05):
         super(MatrixFactorizer, self).__init__()
 
         self.num_mols = num_mols
         self.num_tasks = num_tasks
         self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
         self.p = p
 
         self.mol_embedding = nn.Embedding(self.num_mols, self.embedding_dim)
         self.task_embedding = nn.Embedding(self.num_tasks, self.embedding_dim)
-        self.W1 = nn.Linear()
-        self.W2 = nn.Linear()
+        self.W1 = nn.Linear(2 * self.embedding_dim, self.hidden_dim)
+        self.W2 = nn.Linear(self.hidden_dim, self.num_tasks)
         self.dropout = nn.Dropout(self.p)
         self.relu = nn.ReLU()
+        # TODO: separate cases for regression and classification
+        self.sigmoid = nn.Sigmoid()
 
-    def forward(self, mols: List[int]) -> torch.FloatTensor:
-        pass
+    def forward(self, mol_indices: List[int], task_indices: List[int]) -> torch.FloatTensor:
+        assert len(mol_indices) == len(task_indices)
+
+        # Look up molecule and task embeddings
+        mol_embeddings, task_embeddings = self.mol_embedding(mol_indices), self.task_embedding(task_indices)
+
+        # Concatenate molecule and task embeddings
+        joint_embeddings = torch.cat((mol_embeddings, task_embeddings), dim=1)
+        joint_embeddings = self.dropout(joint_embeddings)
+
+        # Run neural network
+        hiddens = self.relu(self.W1(joint_embeddings))
+        hiddens = self.dropout(hiddens)
+        output = self.sigmoid(self.W2(hiddens))
+
+        return output
