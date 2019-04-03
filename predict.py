@@ -7,10 +7,13 @@ from tqdm import trange
 from data import MoleculeFactorDataset, MoleculeFactorDatapoint
 from model import MatrixFactorizer
 
+from chemprop.data.scaler import StandardScaler
+
 
 def predict(model: MatrixFactorizer,
             data: MoleculeFactorDataset,
             batch_size: int,
+            scaler: StandardScaler=None,
             random_mol_embeddings: bool=False) -> List[float]:
     model.eval()
 
@@ -26,9 +29,15 @@ def predict(model: MatrixFactorizer,
         # Run model
         with torch.no_grad():
             batch_preds = model(mol_indices, task_indices)
+        
+        batch_preds = batch_preds.data.cpu().numpy()
+
+        # Inverse scale if regression
+        if scaler is not None:
+            batch_preds = scaler.inverse_transform(batch_preds)
 
         # Collect predictions
-        batch_preds = batch_preds.data.cpu().numpy().tolist()
+        batch_preds = batch_preds.tolist()
         preds.extend(batch_preds)
 
     return preds

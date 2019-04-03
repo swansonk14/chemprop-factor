@@ -3,6 +3,7 @@ from argparse import Namespace
 from chemprop.data.utils import get_data
 from chemprop.nn_utils import param_count
 from chemprop.utils import get_metric_func, get_loss_func
+from chemprop.data.scaler import StandardScaler
 from torch.optim import Adam
 from tqdm import trange
 
@@ -28,6 +29,15 @@ def main(args: Namespace):
 
     print('Splitting data')
     train_data, val_data, test_data = split_data(data)
+
+    if args.dataset_type == 'regression':
+        print('Scaling data')
+        targets = train_data.targets()
+        scaler = StandardScaler().fit(targets)
+        scaled_targets = scaler.transform(targets).tolist()
+        train_data.set_targets(scaled_targets)
+    else:
+        scaler = None
 
     print(f'Total size = {len(data):,} | '
           f'train size = {len(train_data):,} | val size = {len(val_data):,} | test size = {len(test_data):,}')
@@ -79,6 +89,7 @@ def main(args: Namespace):
             data=val_data,
             metric_func=metric_func,
             batch_size=args.batch_size,
+            scaler=scaler,
             random_mol_embeddings=args.random_mol_embeddings
         )
         print(f'Validation {args.metric} = {val_score:.6f}')
@@ -88,6 +99,7 @@ def main(args: Namespace):
         data=test_data,
         metric_func=metric_func,
         batch_size=args.batch_size,
+        scaler=scaler,
         random_mol_embeddings=args.random_mol_embeddings
     )
     print(f'Test {args.metric} = {test_score:.6f}')

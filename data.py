@@ -27,6 +27,11 @@ class MoleculeFactorDataset:
 
     def targets(self) -> List[int]:
         return [d.target for d in self.data]
+    
+    def set_targets(self, targets: List[List[float]]):
+        assert len(self.data) == len(targets)
+        for i in range(len(self.data)):
+            self.data[i].target = targets[i]
 
     def shuffle(self, seed: int = None):
         if seed is not None:
