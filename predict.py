@@ -10,7 +10,8 @@ from model import MatrixFactorizer
 
 def predict(model: MatrixFactorizer,
             data: MoleculeFactorDataset,
-            batch_size: int) -> List[float]:
+            batch_size: int,
+            random_mol_embeddings: bool=False) -> List[float]:
     model.eval()
 
     preds = []
@@ -20,7 +21,7 @@ def predict(model: MatrixFactorizer,
     for i in trange(0, num_iters, iter_step):
         # Prepare batch
         batch = MoleculeFactorDataset(data[i:i + batch_size])
-        mol_indices, task_indices = batch.mol_indices(), batch.task_indices()
+        mol_indices, task_indices = batch.mol_indices() if random_mol_embeddings else batch.smiles(), batch.task_indices()
 
         # Run model
         with torch.no_grad():
@@ -36,7 +37,8 @@ def predict(model: MatrixFactorizer,
 def fill_matrix(model: MatrixFactorizer,
                 args: Namespace, 
                 data: MoleculeFactorDataset):
-    predict_dataset = MoleculeFactorDataset([MoleculeFactorDatapoint(i, j, -1) for i in range(args.num_mols) for j in range(args.num_tasks)])
+    # TODO this method doesn't work for MPN version yet
+    predict_dataset = MoleculeFactorDataset([MoleculeFactorDatapoint(i, None, j, -1) for i in range(args.num_mols) for j in range(args.num_tasks)])
     preds = predict(model=model,
                     data=predict_dataset,
                     batch_size=args.batch_size)

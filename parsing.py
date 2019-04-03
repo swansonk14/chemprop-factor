@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, Namespace
+from chemprop.parsing import add_train_args as chemprop_add_train_args, modify_train_args as chemprop_modify_train_args
 
 import torch
 
@@ -25,12 +26,14 @@ def add_train_args(parser: ArgumentParser):
                         help='Path to save the data matrix filled with new predictions')
 
     # Model arguments
-    parser.add_argument('--embedding_dim', type=int, default=100,
+    parser.add_argument('--embedding_size', type=int, default=100,
                         help='Molecule/task embedding dimensionality')
-    parser.add_argument('--hidden_dim', type=int, default=100,
+    parser.add_argument('--hidden_size', type=int, default=100,
                         help='Neural network dimensionality')
     parser.add_argument('--dropout', type=float, default=0.05,
                         help='Dropout probability')
+    parser.add_argument('--mpn', action='store_true', default=False,
+                        help='Use mpn for each molecule instead of random embeddings')
 
     # Training arguments
     parser.add_argument('--epochs', type=int, default=5,
@@ -56,12 +59,16 @@ def modify_train_args(args: Namespace):
     if not ((args.dataset_type == 'classification' and args.metric in ['auc', 'prc-auc', 'accuracy']) or
             (args.dataset_type == 'regression' and args.metric in ['rmse', 'mae', 'r2'])):
         raise ValueError(f'Metric "{args.metric}" invalid for dataset type "{args.dataset_type}".')
+    
+    args.random_mol_embeddings = not args.mpn
 
 
 def parse_train_args() -> Namespace:
-    parser = ArgumentParser()
+    parser = ArgumentParser(conflict_handler='resolve')
+    chemprop_add_train_args(parser)
     add_train_args(parser)
     args = parser.parse_args()
+    chemprop_modify_train_args(args)
     modify_train_args(args)
 
     return args

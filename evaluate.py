@@ -14,11 +14,13 @@ def evaluate_predictions(targets: List[int],
 def evaluate(model: MatrixFactorizer,
              data: MoleculeFactorDataset,
              metric_func: Callable,
-             batch_size: int) -> float:
+             batch_size: int,
+             random_mol_embeddings: bool=False) -> float:
     preds = predict(
         model=model,
         data=data,
-        batch_size=batch_size
+        batch_size=batch_size,
+        random_mol_embeddings=random_mol_embeddings
     )
 
     targets = data.targets()

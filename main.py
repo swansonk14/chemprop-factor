@@ -36,16 +36,17 @@ def main(args: Namespace):
         print('Loading saved model')
         model, loaded_args = load(args.checkpoint_path)
         assert args.num_mols == loaded_args.num_mols and args.num_tasks == loaded_args.num_tasks
-        args.embedding_dim, args.hidden_dim, args.dropout, args.activation, args.dataset_type = \
-            loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout, loaded_args.activation, loaded_args.dataset_type
+        args.embedding_size, args.hidden_size, args.dropout, args.activation, args.dataset_type = \
+            loaded_args.embedding_size, loaded_args.hidden_size, loaded_args.dropout, loaded_args.activation, loaded_args.dataset_type
         metric_func = get_metric_func(metric=args.metric)
     else:
         print('Building model')
         model = MatrixFactorizer(
+            args,
             num_mols=num_mols,
             num_tasks=num_tasks,
-            embedding_dim=args.embedding_dim,
-            hidden_dim=args.hidden_dim,
+            embedding_size=args.embedding_size,
+            hidden_size=args.hidden_size,
             dropout=args.dropout,
             activation=args.activation,
             classification=(args.dataset_type == 'classification')
@@ -70,13 +71,15 @@ def main(args: Namespace):
             data=train_data,
             loss_func=loss_func,
             optimizer=optimizer,
-            batch_size=args.batch_size
+            batch_size=args.batch_size,
+            random_mol_embeddings=args.random_mol_embeddings
         )
         val_score = evaluate(
             model=model,
             data=val_data,
             metric_func=metric_func,
-            batch_size=args.batch_size
+            batch_size=args.batch_size,
+            random_mol_embeddings=args.random_mol_embeddings
         )
         print(f'Validation {args.metric} = {val_score:.6f}')
 
@@ -84,7 +87,8 @@ def main(args: Namespace):
         model=model,
         data=test_data,
         metric_func=metric_func,
-        batch_size=args.batch_size
+        batch_size=args.batch_size,
+        random_mol_embeddings=args.random_mol_embeddings
     )
     print(f'Test {args.metric} = {test_score:.6f}')
 

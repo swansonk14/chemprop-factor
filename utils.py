@@ -37,8 +37,8 @@ def load(path: str) -> Tuple[MatrixFactorizer, Namespace]:
     model = MatrixFactorizer(
         num_mols=args.num_mols,
         num_tasks=args.num_tasks,
-        embedding_dim=args.embedding_dim,
-        hidden_dim=args.hidden_dim,
+        embedding_size=args.embedding_size,
+        hidden_size=args.hidden_size,
         dropout=args.dropout,
         activation=args.activation,
         classification=(args.dataset_type == 'classification')

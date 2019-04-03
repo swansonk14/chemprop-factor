@@ -12,7 +12,8 @@ def train(model: MatrixFactorizer,
           data: MoleculeFactorDataset,
           loss_func: Callable,
           optimizer: Optimizer,
-          batch_size: int):
+          batch_size: int,
+          random_mol_embeddings: bool = False):
     model.train()
 
     data.shuffle()
@@ -23,7 +24,7 @@ def train(model: MatrixFactorizer,
         model.zero_grad()
 
         batch = MoleculeFactorDataset(data[i:i + batch_size])
-        mol_indices, task_indices, targets = batch.mol_indices(), batch.task_indices(), batch.targets()
+        mol_indices, task_indices, targets = batch.mol_indices() if random_mol_embeddings else batch.smiles(), batch.task_indices(), batch.targets()
 
         preds = model(mol_indices, task_indices)
 
