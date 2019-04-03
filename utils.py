@@ -1,3 +1,4 @@
+from argparse import Namespace
 from typing import Tuple
 
 from data import MoleculeFactorDataset
@@ -20,14 +21,16 @@ def split_data(data: MoleculeFactorDataset,
 
     return MoleculeFactorDataset(train_data), MoleculeFactorDataset(val_data), MoleculeFactorDataset(test_data)
 
-def save(model, args, path):
+
+def save(model: MatrixFactorizer, args: Namespace, path: str):
     state = {
         'args': args,
         'state_dict': model.state_dict(),
     }
     torch.save(state, path)
 
-def load(path):
+
+def load(path: str) -> Tuple[MatrixFactorizer, Namespace]:
     state = torch.load(path, map_location=lambda storage, loc: storage)
     state_dict = state['state_dict']
     args = state['args']
@@ -41,4 +44,5 @@ def load(path):
         classification=(args.dataset_type == 'classification')
     )
     model.load_state_dict(state_dict)
+
     return model, args

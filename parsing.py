@@ -11,7 +11,7 @@ def add_train_args(parser: ArgumentParser):
                         choices=['classification', 'regression'],
                         help='Type of dataset, e.g. classification or regression.'
                              'This determines the loss function used during training.')
-    parser.add_argument('--metric', type=str, default=None,
+    parser.add_argument('--metric', type=str,
                         choices=['auc', 'prc-auc', 'rmse', 'mae', 'r2', 'accuracy'],
                         help='Metric to use during evaluation.'
                              'Note: Does NOT affect loss function used during training'

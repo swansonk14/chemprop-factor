@@ -1,13 +1,14 @@
 from argparse import Namespace
 
 from chemprop.data.utils import get_data
+from chemprop.nn_utils import param_count
 from chemprop.utils import get_metric_func, get_loss_func
 from torch.optim import Adam
 from tqdm import trange
 
 from data import convert_moleculedataset_to_moleculefactordataset
 from evaluate import evaluate
-from predict import predict, fill_matrix
+from predict import fill_matrix
 from model import MatrixFactorizer
 from parsing import parse_train_args
 from train import train
@@ -39,7 +40,7 @@ def main(args: Namespace):
             loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout, loaded_args.activation, loaded_args.dataset_type
         metric_func = get_metric_func(metric=args.metric)
     else:
-        print('Building new model')
+        print('Building model')
         model = MatrixFactorizer(
             num_mols=num_mols,
             num_tasks=num_tasks,
@@ -49,31 +50,35 @@ def main(args: Namespace):
             activation=args.activation,
             classification=(args.dataset_type == 'classification')
         )
-        loss_func = get_loss_func(args)
-        metric_func = get_metric_func(metric=args.metric)
-        optimizer = Adam(model.parameters(), lr=args.lr)
 
-        if args.cuda:
-            print('Moving model to cuda')
-            model = model.cuda()
+    print(model)
+    print(f'Number of parameters = {param_count(model):,}')
 
-        print('Training')
-        for epoch in trange(args.epochs):
-            print(f'Epoch {epoch}')
-            train(
-                model=model,
-                data=train_data,
-                loss_func=loss_func,
-                optimizer=optimizer,
-                batch_size=args.batch_size
-            )
-            val_score = evaluate(
-                model=model,
-                data=val_data,
-                metric_func=metric_func,
-                batch_size=args.batch_size
-            )
-            print(f'Validation {args.metric} = {val_score:.6f}')
+    loss_func = get_loss_func(args)
+    metric_func = get_metric_func(metric=args.metric)
+    optimizer = Adam(model.parameters(), lr=args.lr)
+
+    if args.cuda:
+        print('Moving model to cuda')
+        model = model.cuda()
+
+    print('Training')
+    for epoch in trange(args.epochs):
+        print(f'Epoch {epoch}')
+        train(
+            model=model,
+            data=train_data,
+            loss_func=loss_func,
+            optimizer=optimizer,
+            batch_size=args.batch_size
+        )
+        val_score = evaluate(
+            model=model,
+            data=val_data,
+            metric_func=metric_func,
+            batch_size=args.batch_size
+        )
+        print(f'Validation {args.metric} = {val_score:.6f}')
 
     test_score = evaluate(
         model=model,
@@ -90,6 +95,7 @@ def main(args: Namespace):
     if args.filled_matrix_path is not None:
         print('Filling matrix of data')
         fill_matrix(model, args, data)
+
 
 if __name__ == '__main__':
     args = parse_train_args()

@@ -32,6 +32,7 @@ def predict(model: MatrixFactorizer,
 
     return preds
 
+
 def fill_matrix(model: MatrixFactorizer,
                 args: Namespace, 
                 data: MoleculeFactorDataset):
