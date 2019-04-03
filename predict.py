@@ -42,6 +42,16 @@ def fill_matrix(model: MatrixFactorizer,
     prediction_matrix = [[None for _ in range(args.num_tasks)] for _ in range(args.num_mols)]
     for datapoint, pred in zip(predict_dataset, preds):
         prediction_matrix[datapoint.mol_index][datapoint.task_index] = str(pred)
+
+    # consider using the following code instead if you have computational trouble maybe
+    # prediction_matrix = []
+    # for i in range(args.num_mols):
+    #     predict_dataset = MoleculeFactorDataset([MoleculeFactorDatapoint(i, j, -1) for j in range(args.num_tasks)])
+    #     preds = predict(model=model,
+    #                     data=predict_dataset,
+    #                     batch_size=args.batch_size)
+    #     prediction_matrix.append(list(preds))
+
     # replace with original value where we have it
     for datapoint in data:
         prediction_matrix[datapoint.mol_index][datapoint.task_index] = str(datapoint.target)
@@ -51,5 +61,7 @@ def fill_matrix(model: MatrixFactorizer,
         mol_index = 0
         for line in original:
             smiles = line.strip().split(',')[0]
+            if len(smiles) == 0:
+                continue
             wf.write(smiles + ',' + ','.join(prediction_matrix[mol_index]) + '\n')
             mol_index += 1

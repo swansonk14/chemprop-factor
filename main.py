@@ -35,8 +35,9 @@ def main(args: Namespace):
         print('Loading saved model')
         model, loaded_args = load(args.checkpoint_path)
         assert args.num_mols == loaded_args.num_mols and args.num_tasks == loaded_args.num_tasks
-        args.embedding_dim, args.hidden_dim, args.dropout_prob, args.activation, args.classification = \
-            loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout_prob, loaded_args.activation, loaded_args.classification
+        args.embedding_dim, args.hidden_dim, args.dropout, args.activation, args.dataset_type = \
+            loaded_args.embedding_dim, loaded_args.hidden_dim, loaded_args.dropout, loaded_args.activation, loaded_args.dataset_type
+        metric_func = get_metric_func(metric=args.metric)
     else:
         print('Building new model')
         model = MatrixFactorizer(

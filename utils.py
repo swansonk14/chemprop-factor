@@ -36,7 +36,9 @@ def load(path):
         num_tasks=args.num_tasks,
         embedding_dim=args.embedding_dim,
         hidden_dim=args.hidden_dim,
-        dropout_prob=args.dropout_prob
+        dropout=args.dropout,
+        activation=args.activation,
+        classification=(args.dataset_type == 'classification')
     )
     model.load_state_dict(state_dict)
     return model, args
