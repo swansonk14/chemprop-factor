@@ -4,6 +4,7 @@ from chemprop.data.utils import get_data
 from chemprop.nn_utils import param_count
 from chemprop.utils import get_metric_func, get_loss_func
 from chemprop.data.scaler import StandardScaler
+import numpy as np
 from torch.optim import Adam
 from tqdm import trange
 
@@ -25,6 +26,7 @@ def main(args: Namespace):
 
     print(f'Number of molecules = {num_mols:,}')
     print(f'Number of tasks = {num_tasks:,}')
+    print(f'Number of real tasks = {args.num_real_tasks:,}')
     print(f'Number of known molecule-task pairs = {len(data):,}')
 
     print('Splitting data')
@@ -48,7 +50,6 @@ def main(args: Namespace):
         assert args.num_mols == loaded_args.num_mols and args.num_tasks == loaded_args.num_tasks
         args.embedding_size, args.hidden_size, args.dropout, args.activation, args.dataset_type = \
             loaded_args.embedding_size, loaded_args.hidden_size, loaded_args.dropout, loaded_args.activation, loaded_args.dataset_type
-        metric_func = get_metric_func(metric=args.metric)
     else:
         print('Building model')
         model = MatrixFactorizer(
@@ -84,25 +85,31 @@ def main(args: Namespace):
             batch_size=args.batch_size,
             random_mol_embeddings=args.random_mol_embeddings
         )
-        val_score = evaluate(
+        val_scores = evaluate(
             model=model,
             data=val_data,
+            num_tasks=args.num_real_tasks,
             metric_func=metric_func,
             batch_size=args.batch_size,
             scaler=scaler,
             random_mol_embeddings=args.random_mol_embeddings
         )
-        print(f'Validation {args.metric} = {val_score:.6f}')
+        print(val_scores)
+        avg_val_score = np.mean(val_scores)
+        print(f'Validation {args.metric} = {avg_val_score:.6f}')
 
-    test_score = evaluate(
+    test_scores = evaluate(
         model=model,
         data=test_data,
+        num_tasks=args.num_real_tasks,
         metric_func=metric_func,
         batch_size=args.batch_size,
         scaler=scaler,
         random_mol_embeddings=args.random_mol_embeddings
     )
-    print(f'Test {args.metric} = {test_score:.6f}')
+    print(test_scores)
+    avg_test_score = np.mean(test_scores)
+    print(f'Test {args.metric} = {avg_test_score:.6f}')
 
     if args.save_path is not None:
         print('Saving model')

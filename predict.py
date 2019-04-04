@@ -13,8 +13,8 @@ from chemprop.data.scaler import StandardScaler
 def predict(model: MatrixFactorizer,
             data: MoleculeFactorDataset,
             batch_size: int,
-            scaler: StandardScaler=None,
-            random_mol_embeddings: bool=False) -> List[float]:
+            scaler: StandardScaler = None,
+            random_mol_embeddings: bool = False) -> List[float]:
     model.eval()
 
     preds = []
