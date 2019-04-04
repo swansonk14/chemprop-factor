@@ -12,6 +12,9 @@ def add_train_args(parser: ArgumentParser):
                         choices=['classification', 'regression'],
                         help='Type of dataset, e.g. classification or regression.'
                              'This determines the loss function used during training.')
+    parser.add_argument('--split_type', type=str,
+                        choices=['entries', 'rows'],
+                        help='split based on entries or on rows (molecules)')
     parser.add_argument('--metric', type=str,
                         choices=['auc', 'prc-auc', 'rmse', 'mae', 'r2', 'accuracy'],
                         help='Metric to use during evaluation.'
@@ -24,6 +27,8 @@ def add_train_args(parser: ArgumentParser):
                         help='Path to load checkpoint from; skips training')
     parser.add_argument('--filled_matrix_path', type=str,
                         help='Path to save the data matrix filled with new predictions')
+    parser.add_argument('--num_real_tasks', type=int,
+                        help='Use the first X tasks for evaluation; subsequent tasks are auxiliary features')
 
     # Model arguments
     parser.add_argument('--embedding_size', type=int, default=100,

@@ -28,7 +28,7 @@ def main(args: Namespace):
     print(f'Number of known molecule-task pairs = {len(data):,}')
 
     print('Splitting data')
-    train_data, val_data, test_data = split_data(data)
+    train_data, val_data, test_data = split_data(data, args)
 
     if args.dataset_type == 'regression':
         print('Scaling data')
