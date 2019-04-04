@@ -19,8 +19,6 @@ def evaluate_predictions(targets: List[int],
         targets_by_task[task_index].append(target)
         preds_by_task[task_index].append(pred)
 
-    import pdb; pdb.set_trace()
-
     results = []
     for task_targets, task_preds in zip(targets_by_task, preds_by_task):
         results.append(metric_func(task_targets, task_preds))
